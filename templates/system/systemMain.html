@@ -1,0 +1,222 @@
+{% extends 'type/controlboard.html' %}
+{% block title %}{{ system_obj.platform }}系统管理{% endblock %}
+
+{% block menu %}
+    {% include 'system/systemType.html' %}
+{% endblock %}
+
+{% block wrapper %}
+    <link href="/static/css/system/systemMain.css" rel="stylesheet" type="text/css"/>
+
+    <div class="baseinfo">
+        <div class="grid">
+            <div class="baseinfo-user">
+                <h2>{{ system_obj.name }}</h2>
+                <span>{{ system_obj.platform }}</span>
+            </div>
+            <div class="baseinfo-uid" style="width: 15%">
+                <h3>系统ID</h3>
+                <span>{{ system_obj.id }}</span>
+            </div>
+            <div class="baseinfo-aid">
+                <h3>所属域</h3>
+                <span>{{ system_obj.domain.name }}</span>
+            </div>
+            <div class="baseinfo-uid">
+                <h3>设备注册码</h3>
+                <span>{{ system_obj.devicecode }}</span>
+            </div>
+            <div class="baseinfo-subuser">
+                <h3>创建者</h3>
+                {% if system_obj.createuser %}
+                    <span>{{ system_obj.createuser.name }}</span>
+                {% else %}
+                    <span>创建者已被删除</span>
+                {% endif %}
+            </div>
+            <div class="baseinfo-system">
+                <h3>设备接入协议</h3>
+                <span>{{ system_obj.protocol }}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="system-wrap">
+        <div class="item">
+            <div class="system-left">
+                <i class="fa fa-server"></i>
+                <p>设备接入总数</p>
+                <b>{{ device_count }}</b>
+            </div>
+            <div class="system-right">
+                <div class="system-top">
+                    <p>当前在线设备数</p>
+                    <b>{{ device_active_count }}</b>
+                    {% if system_waring_devices %}
+                        <p style="margin-top: 32px;color: #EB3C22">当前异常设备数</p>
+                        <b style="color: #EB3C22">{{ system_waring_device_count }}</b>
+                    {% endif %}
+                </div>
+                <div class="system-bottom">
+                    <p>今日新增设备数</p>
+                    <b>{{ new_devices_count }}</b>
+                </div>
+            </div>
+        </div>
+        <div class="item item-right" style="margin-left: 20px;">
+            <div id="device-charts"></div>
+        </div>
+    </div>
+
+    <div class="system-wrap">
+        <div class="item">
+            <div class="system-left">
+                <i class="fa fa-joomla"></i>
+                <p>数据总条数</p>
+                <b>{{ data_count }}</b>
+            </div>
+            <div class="system-right">
+                <div class="system-top">
+                    <p>订阅数据量</p>
+                    <b>{{ pull_count }}</b>
+                    <p style="margin-top: 32px">推送数据量</p>
+                    <b>{{ push_count }}</b>
+                </div>
+                <div class="system-bottom" style="margin-top: 32px">
+                    <p>今日新增数据量</p>
+                    <b>{{ new_data_count }}</b>
+                </div>
+            </div>
+        </div>
+        <div class="item item-right" style="margin-left: 20px;">
+            <div id="data-charts"></div>
+        </div>
+    </div>
+
+    <div class="navigation" style="margin: 30px 20px 0 20px;text-align: center">系统已运行{{ running_days }}天</div>
+
+    <script src="/static/js/system/systemMain.js"></script>
+    <script src="/static/plugins/highcharts/highcharts.js"></script>
+    <script src="/static/plugins/highcharts/exporting.js"></script>
+    <script src="/static/plugins/highcharts/highcharts-zh_CN.js"></script>
+    <script src="/static/plugins/highcharts/grid-light.js"></script>
+    <script src="/static/plugins/highcharts/highcharts-more.js"></script>
+    <script>
+        var chart = Highcharts.chart('device-charts', {
+            chart: {
+                spacing: [0, 0, 0, 0]
+            },
+            title: {
+                floating: true,
+                text: '设备状态'
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        }
+                    },
+                    point: {
+                        events: {
+                            mouseOver: function (e) {  // 鼠标滑过时动态更新标题
+                                chart.setTitle({
+                                    text: e.target.name + '\t' + e.target.y + '台'
+                                });
+                            }
+                        }
+                    },
+                }
+            },
+            series: [{
+                type: 'pie',
+                innerSize: '56%',
+                name: '设备状态',
+                data: [
+                    ['新增离线', {{ new_device_inactive }}],
+                    ['异常设备', {{ system_waring_device_count }}],
+                    ['在线设备', {{ device_active_count }}-{{ new_device_active }}-{{ system_waring_device_count }}],
+                    ['离线设备', {{ device_inactive_count }}-{{ new_device_inactive }}],
+                    ['新增在线', {{ new_device_active }}],
+                ]
+            }]
+        }, function (c) { // 图表初始化完毕后的会掉函数
+            // 环形图圆心
+            var centerY = c.series[0].center[1],
+                titleHeight = parseInt(c.title.styles.fontSize);
+            // 动态设置标题位置
+            c.setTitle({
+                y: centerY + titleHeight / 2
+            });
+        });
+        Highcharts.chart('data-charts', {
+            chart: {
+                type: 'spline'
+            },
+            title: {
+                text: null
+            },
+            subtitle: {
+                text: null
+            },
+            xAxis: {
+                gridLineWidth: 0,
+                categories: [getDay(-4), getDay(-3), getDay(-2), getDay(-1), getDay(0)]
+            },
+            yAxis: {
+                title: {
+                    text: '数据量 (条)'
+                },
+                labels: {
+                    formatter: function () {
+                        return this.value + '条';
+                    }
+                }
+            },
+            tooltip: {
+                crosshairs: true,
+                shared: true
+            },
+            plotOptions: {
+                spline: {
+                    marker: {
+                        radius: 4,
+                        lineColor: '#666666',
+                        lineWidth: 1
+                    }
+                }
+            },
+            series: [{
+                name: '推送',
+                data: [
+                    {% for count in data_push_list %}
+                        {{ count }},
+                    {% endfor %}
+                ]
+            }, {
+                name: '异常',
+                data: [
+                    {% for count in data_waring_list %}
+                        {{ count }},
+                    {% endfor %}
+                ]
+            }, {
+                name: '订阅',
+                data: [
+                    {% for count in data_pull_list %}
+                        {{ count }},
+                    {% endfor %}
+                ]
+            },]
+        });
+
+    </script>
+{% endblock %}

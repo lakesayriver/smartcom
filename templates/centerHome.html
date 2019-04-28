@@ -1,0 +1,245 @@
+{% extends 'type/controlboard.html' %}
+{% block title %}JustCloud-个人中心{% endblock %}
+
+{% block menu %}
+    {% include 'type/hometype.html' %}
+{% endblock %}
+
+{% block wrapper %}
+    <script src="/static/js/jquery.validate.min.js"></script>
+    <link href="/static/css/centerHome.css" rel="stylesheet" type="text/css"/>
+    <div class="navigation" style="margin: 30px 20px 0 20px;text-align: center">{{ user_obj.name }}概况</div>
+
+    <div class="content-w">
+        <div class="content">
+            <form>
+                <div class="content-item">
+                    <div class="item-label">用户账号:</div>
+                    <input class="item-body" type="text" id="username" name="username"
+                           readonly
+                           value={{ user_obj.username }}>
+                    <div class="change" id="username">
+                        <a onclick="loadingIn(),usernameChange(this)">
+                            <i class="fa fa-id-badge"></i>
+                            <span style="margin-left: 4px;">修改账号</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <div class="item-label">用户名:</div>
+                    <input class="item-body" type="text" id="name" name='name'
+                           readonly
+                           value={{ user_obj.name }}>
+                    <div class="change" id="name">
+                        <a onclick="loadingIn(),changeUser_i(this)">
+                            <i class="fa fa-joomla"></i>
+                            <span style="margin-left: 4px;">修改用户名</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <div class="item-label">用户手机号:</div>
+                    <input type="text" id="phone" name="phone" class=" item-body"
+                           readonly
+                           value={{ user_obj.phone }}>
+                    <div class="change" id="phone">
+                        <a onclick="loadingIn(),changeUser_i(this)">
+                            <i class="fa fa-tablet"></i>
+                            <span style="margin-left: 4px;">修改手机号</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <div class="item-label">用户邮箱:</div>
+                    <input class="item-body" type="text" id="email" name="email"
+                           readonly
+                           value={{ user_obj.email }}>
+                    <div class="change" id="email">
+                        <a onclick="loadingIn(),changeUser_i(this)">
+                            <i class="fa fa-envelope"></i>
+                            <span style="margin-left: 4px;">修改邮箱</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <div class="item-label">用户年龄:</div>
+                    {% if user_obj.age %}
+                        <input class="item-body" type="text" id="age" name="age"
+                               readonly
+                               value={{ user_obj.age }}>
+                    {% else %}
+                        <input class="item-body" type="text" id="age" name="age"
+                               readonly
+                               value="保密">
+                    {% endif %}
+                    <div class="change" id="age">
+                        <a onclick="loadingIn(),changeUser_i(this)">
+                            <i class="fa fa-universal-access"></i>
+                            <span style="margin-left: 4px;">修改年龄</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="content-item">
+                    <div class="item-label">用户性别:</div>
+                    {% if user_obj.sex == 1 %}
+                        <input class="item-body" type="text" id="sex" name="sex"
+                               readonly
+                               value="男">
+                    {% elif user_obj.sex == 0 %}
+                        <input class="item-body" type="text" id="sex" name="sex"
+                               readonly
+                               value="女">
+                    {% else %}
+                        <input class="item-body" type="text" id="sex" name="sex"
+                               readonly
+                               value="保密">
+                    {% endif %}
+                    <div class="change" id="sex">
+                        <a onclick="loadingIn(),changeUser_s(this)">
+                            <i class="fa fa-venus-mars"></i>
+                            <span style="margin-left: 4px;">修改性别</span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+            <div class="i-footer">
+                <button onclick="loadingIn(),passwordshow()"><i
+                        class="fa fa-first-order" aria-hidden="true"></i><span>修改密码</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="change-user" id="user-change">
+        <div class="change-table">
+            <a class="change-table-close" onclick="loadingIn(),closechange(this)"><i class="fa fa-times"></i></a>
+            <div class="change-table-header">用户信息修改</div>
+            <div class="change-table-form">
+                <div>
+                    <form>
+                        <p>用户个人信息修改</p>
+                        {% csrf_token %}
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">用户账号:</label>
+                            <div class="form-input">
+                                <input type="text" placeholder="请输入用户账号" id="username" name="username"
+                                       readonly
+                                       onclick="reWaring(this)" onblur="get_error(this)"
+                                       value={{ user_obj.username }}>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">用户名:</label>
+                            <div class="form-input">
+                                <input type="text" placeholder="请输入用户名" id="name" name="name"
+                                       value={{ user_obj.name }}
+                                               onclick="reWaring(this)" onblur="get_error(this)"
+                                       readonly>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">用户手机号:</label>
+                            <div class="form-input">
+                                <input type="text" placeholder="请输入手机号" id="phone" name="phone"
+                                       value={{ user_obj.phone }}
+                                               onclick="reWaring(this)" onblur="get_error(this)"
+                                       readonly>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">用户邮箱:</label>
+                            <div class="form-input">
+                                <input type="text" placeholder="请输入用户邮箱" id="email" name="email"
+                                       value={{ user_obj.email }}
+                                               onclick="reWaring(this)" onblur="get_error(this)"
+                                       readonly>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">用户年龄:</label>
+                            <div class="form-input">
+                                {% if user_obj.age %}
+                                    <input type="text" placeholder="请输入用户年龄" id="age" name="age"
+                                           value={{ user_obj.age }}
+                                                   onclick="reWaring(this)" onblur="get_error(this)"
+                                           readonly>
+                                {% else %}
+                                    <input type="text" placeholder="保密" id="age" name="age"
+                                           onclick="reWaring(this)" onblur="get_error(this)"
+                                           readonly>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">用户性别:</label>
+                            <div class="form-input">
+                                <select class="item-body" name="sex" id="sex" onclick="reWaring(this)" disabled>
+                                    {% if user_obj.sex == 1 %}
+                                        <option value="">保密</option>
+                                        <option value=0>女</option>
+                                        <option value=1 selected="selected">男</option>
+                                    {% elif user_obj.sex == 0 %}
+                                        <option value="">保密</option>
+                                        <option value=0 selected="selected">女</option>
+                                        <option value=1>男</option>
+                                    {% else %}
+                                        <option selected="selected" value="">保密</option>
+                                        <option value=0>女</option>
+                                        <option value=1>男</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="change-table-footer">
+                <button class="sent" onclick="loadingIn(),userChange()"><span>确定</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="change-user" id="password-change">
+        <div class="change-table">
+            <a class="change-table-close" onclick="loadingIn(),closechange(this)"><i class="fa fa-times"></i></a>
+            <div class="change-table-header">修改密码</div>
+            <div class="change-table-form">
+                <div>
+                    <form>
+                        {% csrf_token %}
+                        <p>用户密码修改</p>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">输入旧密码:</label>
+                            <div class="form-input">
+                                <input type="password" name="o_password" id="o_password"
+                                       onblur="get_error(this)"
+                                       onclick="reWaring(this)"
+                                       placeholder="请输入旧密码">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">输入新密码:</label>
+                            <div class="form-input">
+                                <input type="password" name="password" id="password"
+                                       onblur="get_error(this)"
+                                       onclick="reWaring(this)"
+                                       placeholder="需包含字母数字符号，长度至少为8位">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 24px">
+                            <label class="form-item">确认新密码:</label>
+                            <div class="form-input">
+                                <input type="password" id="pwd_s" name="pwd_s"
+                                       onclick="reWaring(this)" onblur="get_error(this)" placeholder="请再次输入密码">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="change-table-footer">
+                <button class="sent" onclick="loadingIn(),passwordChange()"><span>确定</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/centerHome.js"></script>
+{% endblock %}
